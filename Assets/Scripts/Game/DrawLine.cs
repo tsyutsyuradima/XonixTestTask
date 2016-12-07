@@ -11,19 +11,20 @@ public class DrawLine : MonoBehaviour
 
     void Awake()
     {
-        line = gameObject.AddComponent<LineRenderer>();
-        line.material = new Material(Shader.Find("Particles/Additive"));
-        line.SetVertexCount(0);
-        line.SetWidth(0.05f, 0.05f);
-        line.SetColors(Color.white, Color.white);
-        line.useWorldSpace = true;
-        isDrawingLine = false;
-        isPause = false;
-        pointsList = new List<Vector2>();
+        
     }
 
     void Start()
     {
+        line = gameObject.GetComponent<LineRenderer>();
+        //line.material = new Material(Shader.Find("Unlit/Color"));
+        //line.SetVertexCount(0);
+        //line.SetWidth(0.05f, 0.05f);
+        //line.SetColors(Color.white, Color.white);
+        //line.useWorldSpace = true;
+        isDrawingLine = false;
+        isPause = false;
+        pointsList = new List<Vector2>();
         GameController.Inst.onStartMoving += Player_onStartMoving;
         GameController.Inst.onEndMoving += Player_onEndMoving;
         GameController.Inst.onPauseGame += Player_onPauseGame;

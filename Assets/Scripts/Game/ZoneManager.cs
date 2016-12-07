@@ -12,9 +12,11 @@ public class ZoneManager : MonoBehaviour
     public List<Vector2> newPosArray = new List<Vector2>();
     public List<Vector2> currentPosArray = new List<Vector2>();
     public List<Vector2> defaultEnemyZone ;
+
+    public Material material;
     GameObject enemyZone;
 
-	void Start ()
+    void Start ()
     {
         GameController.Inst.onStartGame += GameManager_onStartGame;
         GameController.Inst.onLevelUp += GameManager_onLevelUp;
@@ -329,7 +331,7 @@ public class ZoneManager : MonoBehaviour
         }
 
         filter.mesh = msh;
-        render.material = new Material(Shader.Find("Unlit/Color"));
+        render.material = material;
         render.material.color = color;
         return tmp;
     }

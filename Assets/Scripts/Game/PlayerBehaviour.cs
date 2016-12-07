@@ -10,7 +10,6 @@ public delegate void Vector3Action(Vector3 pos);
 public delegate void SwipeAction(Direction dir);
 
 
-
 /// <summary>
 ///     This class is Responsible for moving "player".
 ///     
@@ -27,10 +26,12 @@ public class PlayerBehaviour : MonoBehaviour
 
     Vector3 topLeftPos;
     Vector3 bottomRightPos;
-    Vector3 prevFramePos;
 
     int topX;
     int topY;
+
+    bool canMoving = false;
+
     void Start()
     {
         GameController.Inst.onStartGame += Inst_onStartGame;
@@ -50,11 +51,13 @@ public class PlayerBehaviour : MonoBehaviour
 
     private void Inst_onResumeGame()
     {
+        canMoving = true;
         newDirection = currentDirection;
     }
 
     private void Inst_onPauseGame()
     {
+        canMoving = false;
         newDirection = Direction.NONE;
     }
 
@@ -65,6 +68,7 @@ public class PlayerBehaviour : MonoBehaviour
     
     private void Inst_onStartGame()
     {
+        canMoving = true;
         ResetPlayer();
     }
     private void PlayerBehaviour_onSwipe(Direction dir)
@@ -87,47 +91,49 @@ public class PlayerBehaviour : MonoBehaviour
 
     void FixedUpdate ()
     {
-        prevFramePos = currentPosition.position;
-        Vector3 pos = currentPosition.position;
-        switch (newDirection)
+        if (canMoving)
         {
-            case Direction.Left:
-                if (pos.y < topLeftPos.y)
-                {
-                    if (currentDirection != Direction.Left) onChangeDirection(pos);
-                    pos.y += GameController.playerSpeed;
-                    pos.y = (float)Math.Round(pos.y, 2);
-                    currentDirection = Direction.Left;
-                }
-                break;
-            case Direction.Up:
-                if (pos.x > topLeftPos.x)
-                {
-                    if (currentDirection != Direction.Up) onChangeDirection(pos);
-                    pos.x -= GameController.playerSpeed;
-                    pos.x = (float)Math.Round(pos.x, 2);
-                    currentDirection = Direction.Up;
-                }
-                break;
-            case Direction.Down:
-                if (pos.y > bottomRightPos.y)
-                {
-                    if (currentDirection != Direction.Down) onChangeDirection(pos);
-                    pos.y -= GameController.playerSpeed;
-                    pos.y = (float)Math.Round(pos.y, 2);
-                    currentDirection = Direction.Down;
-                }
-                break;
-            case Direction.Right:
-                if (pos.x < bottomRightPos.x)
-                {
-                    if (currentDirection != Direction.Right) onChangeDirection(pos);
-                    pos.x += GameController.playerSpeed;
-                    pos.x = (float)Math.Round(pos.x, 2);
-                    currentDirection = Direction.Right;
-                }
-                break;
+            Vector3 pos = currentPosition.position;
+            switch (newDirection)
+            {
+                case Direction.Left:
+                    if (pos.y < topLeftPos.y)
+                    {
+                        if (currentDirection != Direction.Left) onChangeDirection(pos);
+                        pos.y += GameController.playerSpeed;
+                        pos.y = (float)Math.Round(pos.y, 2);
+                        currentDirection = Direction.Left;
+                    }
+                    break;
+                case Direction.Up:
+                    if (pos.x > topLeftPos.x)
+                    {
+                        if (currentDirection != Direction.Up) onChangeDirection(pos);
+                        pos.x -= GameController.playerSpeed;
+                        pos.x = (float)Math.Round(pos.x, 2);
+                        currentDirection = Direction.Up;
+                    }
+                    break;
+                case Direction.Down:
+                    if (pos.y > bottomRightPos.y)
+                    {
+                        if (currentDirection != Direction.Down) onChangeDirection(pos);
+                        pos.y -= GameController.playerSpeed;
+                        pos.y = (float)Math.Round(pos.y, 2);
+                        currentDirection = Direction.Down;
+                    }
+                    break;
+                case Direction.Right:
+                    if (pos.x < bottomRightPos.x)
+                    {
+                        if (currentDirection != Direction.Right) onChangeDirection(pos);
+                        pos.x += GameController.playerSpeed;
+                        pos.x = (float)Math.Round(pos.x, 2);
+                        currentDirection = Direction.Right;
+                    }
+                    break;
+            }
+            currentPosition.transform.position = pos;
         }
-        currentPosition.transform.position = pos;
     }
 }
