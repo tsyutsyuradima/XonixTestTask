@@ -31,7 +31,7 @@ public class TimeController : MonoBehaviour
         FildImage.fillAmount = currentTime;
     }
 
-    private void GameManager_onLevelUp()
+    private void GameManager_onLevelUp(int level)
     {
         currentTime = 0;
         allTime = GameController.Inst.GetLevelTime();

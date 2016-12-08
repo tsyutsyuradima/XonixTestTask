@@ -1,5 +1,13 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
+
+
+public delegate void ChangeDirection(Vector2 pos);
+public delegate void SimpleAction();
+public delegate void IntAction(int value);
+public delegate void Vector3Action(Vector3 pos);
+public delegate void SwipeAction(Direction dir);
 
 /// <summary>
 /// 
@@ -10,6 +18,8 @@ using System.Collections;
 public class GameController : MonoBehaviour
 {
     public static float playerSpeed = 0.04f;
+    public static float enemySpeed = 0.04f;
+
 
     static GameController inst;
     public static GameController Inst { get { return inst; } set { } }
@@ -20,7 +30,7 @@ public class GameController : MonoBehaviour
     public event Vector3Action onBroken;
 
     public event SimpleAction onScoreUpdate;
-    public event SimpleAction onLevelUp;
+    public event IntAction onLevelUp;
     public event SimpleAction onStartGame;
     public event SimpleAction onPauseGame;
     public event SimpleAction onResumeGame;
@@ -30,6 +40,8 @@ public class GameController : MonoBehaviour
     PlayerBehaviour player;
     [SerializeField]
     ZoneManager zoneManager;
+    [SerializeField]
+    DrawLine drawLine;
     [SerializeField]
     AudioClip levelUp;
     [SerializeField]
@@ -45,8 +57,9 @@ public class GameController : MonoBehaviour
     float currentLevelTime = 6000f;
     int fullEnemySquare = 0;
     float fillingProcentLevelUp = 0.8f;
-    bool isDrawingNewZone = false;
+    public bool isDrawingNewZone = false;
     Vector3 playerPosition;
+    EnemyController enemyController;
 
     void Awake ()
     {
@@ -54,32 +67,30 @@ public class GameController : MonoBehaviour
     }
     void Start()
     {
+        enemyController = new EnemyController();
         player.onChangeDirection += Player_onChangeDirection;
     }
 
     /// <summary>
     /// This Update is responsible for cheking is player in collider;
     /// </summary>
-    void Update()
+    void FixedUpdate()
     {
         Vector3 newPos = GetPlayerPos();
         if (playerPosition != newPos)
         {
-            bool isVectorIntersectCollide = LineHelper.isVectorIntersectCollide(newPos, zoneManager.currentPosArray);
-            if (!isDrawingNewZone && !isVectorIntersectCollide)
+            bool isInPoligon = LineHelper.IsPointInPolygon(zoneManager.currentPosArray, newPos);
+            if (!isDrawingNewZone && isInPoligon)
             {
-                bool isInPoligon = LineHelper.IsPointInPolygon(zoneManager.currentPosArray, newPos);
-                if (isInPoligon)
-                {
-                    isDrawingNewZone = true;
-                    if (onStartMoving != null)
-                        onStartMoving(playerPosition);
-                }
-            }
+                isDrawingNewZone = true;
 
-            if (isDrawingNewZone && isVectorIntersectCollide)
+                if (onStartMoving != null)
+                    onStartMoving(newPos);
+            }
+            if (isDrawingNewZone && !isInPoligon)
             {
                 isDrawingNewZone = false;
+
                 if (onEndMoving != null)
                     onEndMoving(newPos);
                 player.StopMoving();
@@ -91,7 +102,7 @@ public class GameController : MonoBehaviour
     public void StartGame()
     {
         currentScore = 0;
-        currentLevel = 0;
+        currentLevel = 1;
         currentHearts = 3;
         isDrawingNewZone = false;
 
@@ -121,7 +132,7 @@ public class GameController : MonoBehaviour
         player.ResetPlayer();
 
         if (onLevelUp != null)
-            onLevelUp();
+            onLevelUp(currentLevel);
     }
 
     public void GameOver()
@@ -138,6 +149,7 @@ public class GameController : MonoBehaviour
 
     public void Broken()
     {
+        isDrawingNewZone = false;
         audioSource.Stop();
         currentHearts--;
 
@@ -152,8 +164,6 @@ public class GameController : MonoBehaviour
             onGameOver();
         }
         audioSource.Play();
-
-        isDrawingNewZone = false;
     }
 
     public void CalculateNewScore(float OpenZoneSquare, float LeftZoneSquare)
@@ -188,6 +198,17 @@ public class GameController : MonoBehaviour
     {
         return player.CurrentPosition.position;
     }
+
+    public List<Vector2> GetEnemyZone()
+    {
+        return zoneManager.currentPosArray;
+    }
+
+    public List<Vector2> GetDrawLine()
+    {
+        return drawLine.GetPointsList();
+    }
+
     private void Player_onChangeDirection(Vector2 pos)
     {
         if (isDrawingNewZone && onChangeDirection != null)

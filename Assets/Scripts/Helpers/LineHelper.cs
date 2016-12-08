@@ -21,7 +21,7 @@ public static class LineHelper
         for (int i = 0; i < pointsList.Count; i++)
         {
             int nextIndex = (i < pointsList.Count-1) ? i + 1 : 0;
-            if (LineHelper.isVectorIntersect(vector, new myLine() { StartPoint = pointsList[i], EndPoint = pointsList[nextIndex]}))
+            if (LineHelper.isVectorIntersect(vector, new myLine() { StartPoint = pointsList[i], EndPoint = pointsList[nextIndex]}, 0.04f))
                 return true;
         }
         return false;
@@ -100,7 +100,12 @@ public static class LineHelper
     //	-----------------------------------	
     public static bool checkPoints(Vector3 pointA, Vector3 pointB)
     {
-        return (pointA.x == pointB.x && pointA.y == pointB.y);
+        return (pointA.x >= pointB.x - GameController.playerSpeed &&
+                pointA.x <= pointB.x + GameController.playerSpeed &&
+                pointA.y >= pointB.y - GameController.playerSpeed &&
+                pointA.y <= pointB.y + GameController.playerSpeed);
+
+          //return   (pointA.x == pointB.x && pointA.y == pointB.y);
     }
     //	-----------------------------------	
     //	Following method checks whether given two line intersect or not
@@ -140,21 +145,36 @@ public static class LineHelper
     }
 
 
-    public static bool IsPointInPolygon(List<Vector2> polygon, Vector2 testPoint)
+    public static bool IsPointInPolygon(List<Vector2> polygon, Vector2 p)
     {
-        bool result = false;
-        int j = polygon.Count - 1;
-        for (int i = 0; i < polygon.Count; i++)
+        bool inside = false;
+        for (int i = 0, j = polygon.Count - 1; i < polygon.Count; j = i++)
         {
-            if (polygon[i].y < testPoint.y && polygon[j].y >= testPoint.y || polygon[j].y < testPoint.y && polygon[i].y >= testPoint.y)
+            if ((polygon[i].y > p.y) != (polygon[j].y > p.y) &&
+                 p.x < (polygon[j].x - polygon[i].x) * (p.y - polygon[i].y) / (polygon[j].y - polygon[i].y) + polygon[i].x)
             {
-                if (polygon[i].x + (testPoint.y - polygon[i].y) / (polygon[j].y - polygon[i].y) * (polygon[j].x - polygon[i].x) < testPoint.x)
-                {
-                    result = !result;
-                }
+                inside = !inside;
             }
-            j = i;
         }
-        return result;
+
+        return inside;
+
+        //bool result = false;
+        //int j = polygon.Count - 1;
+        //for (int i = 0; i < polygon.Count; i++)
+        //{
+        //    if (polygon[i].y < testPoint.y && 
+        //        polygon[j].y >= testPoint.y || 
+        //        polygon[j].y < testPoint.y && 
+        //        polygon[i].y >= testPoint.y)
+        //    {
+        //        if (polygon[i].x + (testPoint.y - polygon[i].y) / (polygon[j].y - polygon[i].y) * (polygon[j].x - polygon[i].x) < testPoint.x)
+        //        {
+        //            result = true;
+        //        }
+        //    }
+        //    j = i;
+        //}
+        //return result;
     }
 }

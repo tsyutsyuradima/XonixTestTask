@@ -24,9 +24,12 @@ public class ZoneManager : MonoBehaviour
         GameController.Inst.onEndMoving += Player_onEndMoving;
         GameController.Inst.onBroken += Player_onBroken;
         GameController.Inst.onChangeDirection += Player_onChangeDirection;
+
+        DrawGreenZone();
+        DrawEnemyZone();
     }
 
-    private void GameManager_onLevelUp()
+    private void GameManager_onLevelUp(int Level)
     {
         newPosArray.Clear();
         DrawEnemyZone();
@@ -35,7 +38,6 @@ public class ZoneManager : MonoBehaviour
     private void GameManager_onStartGame()
     {
         newPosArray.Clear();
-        DrawGreenZone();
         DrawEnemyZone();
     }
     private void Player_onStartMoving(Vector3 newPos)
@@ -68,33 +70,6 @@ public class ZoneManager : MonoBehaviour
     /// </summary>
     private void Player_onChangeDirection(Vector2 newPos)
     {
-        /// <summary>
-        ///    This exeption for situations like this : 
-        ///    http://prntscr.com/dg6bon
-        /// </summary>
-        if (newPosArray.Count > 0)
-        {
-            myLine newLine = new myLine() { StartPoint = newPosArray[newPosArray.Count - 1], EndPoint = newPos };
-            bool isContains = false;
-            foreach (Vector2 pos in currentPosArray)
-            {
-                if (pos.x >= newLine.StartPoint.x - GameController.playerSpeed &&
-                    newLine.StartPoint.x + GameController.playerSpeed >= pos.x &&
-                    pos.y >= newLine.StartPoint.y - GameController.playerSpeed &&
-                    newLine.StartPoint.y + GameController.playerSpeed >= pos.y)
-                    isContains = true;
-            }
-            foreach (Vector2 pos in currentPosArray)
-            {
-                if (LineHelper.isVectorIntersect(pos, newLine))
-                {
-                    if (isContains)
-                        newPosArray[newPosArray.Count - 1] = pos;
-                    else
-                        newPosArray.Add(pos);
-                }
-            };
-        }
         newPos.x = (float)Math.Round(newPos.x,2);
         newPos.y = (float)Math.Round(newPos.y,2);
         newPosArray.Add(newPos);
@@ -279,7 +254,7 @@ public class ZoneManager : MonoBehaviour
         for (int i = 0; i < currentPosArray.Count; i++)
         {
             int nextIndex = (i < currentPosArray.Count - 1) ? i + 1 : 0;
-            if (LineHelper.isVectorIntersect(pos, new myLine() { StartPoint = currentPosArray[i], EndPoint = currentPosArray[nextIndex]}, GameController.playerSpeed))
+            if (LineHelper.isVectorIntersect(pos, new myLine() { StartPoint = currentPosArray[i], EndPoint = currentPosArray[nextIndex]}, GameController.playerSpeed * 1.2f))
             {
                 pos.x = (currentPosArray[i].x == currentPosArray[nextIndex].x) ? currentPosArray[i].x : pos.x;
                 pos.y = (currentPosArray[i].y == currentPosArray[nextIndex].y) ? currentPosArray[i].y : pos.y;

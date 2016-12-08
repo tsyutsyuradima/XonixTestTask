@@ -2,13 +2,7 @@
 using System.Collections;
 using System;
 
-public enum Direction { Left, Up, Down, Right, NONE };
-
-public delegate void ChangeDirection(Vector2 pos);
-public delegate void SimpleAction();
-public delegate void Vector3Action(Vector3 pos);
-public delegate void SwipeAction(Direction dir);
-
+public enum Direction { Left, Up, Down, Right, TopLeft, TopRight, BottomRight, BottomLeft, NONE };
 
 /// <summary>
 ///     This class is Responsible for moving "player".
@@ -21,12 +15,10 @@ public class PlayerBehaviour : MonoBehaviour
 
     Direction currentDirection;
     Direction newDirection;
-    Transform currentPosition;
-    public Transform CurrentPosition { get { return currentPosition; } set { } }
+    public Transform CurrentPosition { get { return transform; } set { } }
 
     Vector3 topLeftPos;
     Vector3 bottomRightPos;
-
     int topX;
     int topY;
 
@@ -35,18 +27,22 @@ public class PlayerBehaviour : MonoBehaviour
     void Start()
     {
         GameController.Inst.onStartGame += Inst_onStartGame;
-        GameController.Inst.onBroken += Inst_onBroken;
         GameController.Inst.onPauseGame += Inst_onPauseGame;
         GameController.Inst.onResumeGame += Inst_onResumeGame;
+        GameController.Inst.onBroken += Inst_onBroken;
 
 
-        currentPosition = gameObject.GetComponent<Transform>();
         topX = Screen.width / 2;
         topY = Screen.height - 10;
-        currentPosition.position = Camera.main.ScreenToWorldPoint(new Vector2(topX, topY));
+        transform.position = Camera.main.ScreenToWorldPoint(new Vector2(topX, topY));
         topLeftPos = Camera.main.ScreenToWorldPoint(new Vector3(0, Screen.height));
         bottomRightPos = Camera.main.ScreenToWorldPoint(new Vector3(Screen.width - 5, 5));
         gameObject.AddComponent<SwipeControl>().onSwipe += PlayerBehaviour_onSwipe;
+    }
+
+    private void Inst_onBroken(Vector3 pos)
+    {
+        ResetPlayer();
     }
 
     private void Inst_onResumeGame()
@@ -61,11 +57,6 @@ public class PlayerBehaviour : MonoBehaviour
         newDirection = Direction.NONE;
     }
 
-    private void Inst_onBroken(Vector3 pos)
-    {
-        ResetPlayer();
-    }
-    
     private void Inst_onStartGame()
     {
         canMoving = true;
@@ -78,7 +69,7 @@ public class PlayerBehaviour : MonoBehaviour
 
     public void ResetPlayer()
     {
-        currentPosition.position = Camera.main.ScreenToWorldPoint(new Vector2(topX, topY));
+        transform.position = Camera.main.ScreenToWorldPoint(new Vector2(topX, topY));
         currentDirection = Direction.NONE;
         newDirection = Direction.NONE;
     }
@@ -93,7 +84,7 @@ public class PlayerBehaviour : MonoBehaviour
     {
         if (canMoving)
         {
-            Vector3 pos = currentPosition.position;
+            Vector3 pos = transform.position;
             switch (newDirection)
             {
                 case Direction.Left:
@@ -133,7 +124,7 @@ public class PlayerBehaviour : MonoBehaviour
                     }
                     break;
             }
-            currentPosition.transform.position = pos;
+            transform.transform.position = pos;
         }
     }
 }

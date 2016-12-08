@@ -5,7 +5,6 @@ using System.Collections.Generic;
 public class DrawLine : MonoBehaviour
 {
     private LineRenderer line;
-    private bool isDrawingLine;
     private bool isPause;
     private List<Vector2> pointsList;
 
@@ -22,13 +21,19 @@ public class DrawLine : MonoBehaviour
         //line.SetWidth(0.05f, 0.05f);
         //line.SetColors(Color.white, Color.white);
         //line.useWorldSpace = true;
-        isDrawingLine = false;
         isPause = false;
         pointsList = new List<Vector2>();
         GameController.Inst.onStartMoving += Player_onStartMoving;
         GameController.Inst.onEndMoving += Player_onEndMoving;
         GameController.Inst.onPauseGame += Player_onPauseGame;
         GameController.Inst.onResumeGame += Player_onResumeGame;
+        GameController.Inst.onBroken += Player_onBroken;
+    }
+
+    private void Player_onBroken(Vector3 pos)
+    {
+        line.SetVertexCount(0);
+        pointsList.Clear();
     }
 
     private void Player_onResumeGame()
@@ -41,16 +46,19 @@ public class DrawLine : MonoBehaviour
     }
     private void Player_onEndMoving(Vector3 pos)
     {
-        isDrawingLine = false;
         Refresh();
     }
     private void Player_onStartMoving(Vector3 pos)
     {
         Refresh();
-        isDrawingLine = true;
         pointsList.Add(pos);
         line.SetVertexCount(pointsList.Count);
         line.SetPosition(pointsList.Count - 1, (Vector3)pointsList[pointsList.Count - 1]);
+    }
+
+    public List<Vector2> GetPointsList()
+    {
+        return pointsList;
     }
 
     void Refresh()
@@ -61,12 +69,11 @@ public class DrawLine : MonoBehaviour
 
     void FixedUpdate()
     {
-        if (isDrawingLine && !isPause)
+        if (GameController.Inst.isDrawingNewZone && !isPause)
         {
             Vector2 targetPos = GameController.Inst.GetPlayerPos();
             if (pointsList.Contains(targetPos))
             {
-                isDrawingLine = false;
                 Refresh();
                 GameController.Inst.Broken();
                 return;
@@ -78,7 +85,6 @@ public class DrawLine : MonoBehaviour
 
             if (LineHelper.isLineCollide(pointsList))
             {
-                isDrawingLine = false;
                 Refresh();
                 GameController.Inst.Broken();
                 return;

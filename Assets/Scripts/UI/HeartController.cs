@@ -16,7 +16,7 @@ public class HeartController : MonoBehaviour
         GameController.Inst.onLevelUp += GameManager_onLevelUp;
 	}
 
-    private void GameManager_onLevelUp()
+    private void GameManager_onLevelUp(int level)
     {
         ResetHearts();
     }
